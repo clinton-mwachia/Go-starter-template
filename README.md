@@ -4,11 +4,8 @@
 
 # Go-Gin Starter Template
 
-<div align="center">
-    [![Go Version](https://img.shields.io/badge/Go-1.21.4-blue.svg)](https://go.dev/)
-    [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-</div>
-
+[![Go Version](https://img.shields.io/badge/Go-1.21.4-blue.svg)](https://go.dev/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 ## Features
 - Shemas and Models.
