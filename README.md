@@ -1,14 +1,16 @@
 <p align="center">
-  <img src="assets/Go.png" alt="Golang Icon" width="200" height="200">
+  <img src="assets/Go.png" alt="Golang Icon" width="300" height="200">
 </p>
 
 # Go-Gin Starter Template
 
-[![Go Version](https://img.shields.io/badge/Go-1.21.4-blue.svg)](https://go.dev/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+<div align="center">
+    [![Go Version](https://img.shields.io/badge/Go-1.21.4-blue.svg)](https://go.dev/)
+    [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+</div>
+
 
 ## Features
-
 - Shemas and Models.
 - Routes.
 - Authentication.
