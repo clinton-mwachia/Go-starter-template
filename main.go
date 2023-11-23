@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Go-starter-template/routes"
 	"context"
 	"log"
 
@@ -11,29 +12,29 @@ import (
 )
 
 var ctx context.Context
-var MONGO_URI = "mongodb://127.0.0.1:27017/todo"
 var client *mongo.Client
 var err error
+var MONGO_URI = "mongodb://127.0.0.1:27017/todo"
+var usersHandler *routes.UsersHandler
 
 func init() {
 	ctx = context.Background()
-	client, err = mongo.Connect(ctx, options.Client().ApplyURI(MONGO_URI))
-
+	client, err = mongo.Connect(ctx,
+		options.Client().ApplyURI(MONGO_URI))
 	if err = client.Ping(context.TODO(),
 		readpref.Primary()); err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Connected to DB")
+	users_collection := client.Database("todo").Collection("users")
+	usersHandler = routes.NewUsersHandler(ctx, users_collection)
 }
 
 func main() {
 	router := gin.Default()
 
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Hello",
-		})
-	})
+	/* users*/
+	router.GET("/", usersHandler.GetUsers)
 
 	router.Run(":8080")
 }
