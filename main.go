@@ -38,6 +38,7 @@ func main() {
 	router.GET("/users", usersHandler.ListUsersHandler)
 	router.GET("user/:id", usersHandler.GetUserByIdHandler)
 	router.GET("users/:role", usersHandler.ListUsersByRoleHandler)
+	router.DELETE("user/:id", usersHandler.DeleteUserHandler)
 
 	router.Run(":8080")
 }
