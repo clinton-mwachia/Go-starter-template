@@ -152,3 +152,39 @@ func (handler *UsersHandler) UpdateUserHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "User has been updated"})
 }
+
+// update user password
+func (handler *UsersHandler) UpdateUserPasswordHandler(c *gin.Context) {
+	id := c.Param("id")
+	var user models.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		return
+	}
+
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "password", Value: string(hashedPassword)},
+		}},
+	}
+
+	_, err = handler.collection.UpdateOne(handler.ctx, bson.M{"id": objectID}, update)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User password updated"})
+}
