@@ -69,3 +69,41 @@ func (handler *UsersHandler) ListUsersHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, users)
 }
+
+// get user by id
+func (handler *UsersHandler) GetUserByIdHandler(c *gin.Context) {
+	id := c.Param("id")
+	objectId, _ := primitive.ObjectIDFromHex(id)
+	cur := handler.collection.FindOne(handler.ctx, bson.M{
+		"id": objectId,
+	})
+	var user models.User
+	err := cur.Decode(&user)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+// get users by role
+func (handler *UsersHandler) ListUsersByRoleHandler(c *gin.Context) {
+	role := c.Param("role")
+	cur, err := handler.collection.Find(handler.ctx, bson.M{"role": role})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer cur.Close(handler.ctx)
+
+	users := make([]models.User, 0)
+	for cur.Next(handler.ctx) {
+		var user models.User
+		cur.Decode(&user)
+		users = append(users, user)
+	}
+
+	c.JSON(http.StatusOK, users)
+}
