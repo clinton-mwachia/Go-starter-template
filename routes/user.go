@@ -4,8 +4,10 @@ import (
 	"Go-starter-template/models"
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -16,6 +18,8 @@ type UsersHandler struct {
 	collection *mongo.Collection
 	ctx        context.Context
 }
+
+var secret = "mysecret111"
 
 func NewUsersHandler(ctx context.Context, collection *mongo.Collection) *UsersHandler {
 	return &UsersHandler{
@@ -187,4 +191,53 @@ func (handler *UsersHandler) UpdateUserPasswordHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "User password updated"})
+}
+
+// log in user
+func (handler *UsersHandler) SignInHandler(c *gin.Context) {
+	var userInput struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+
+	// Bind the JSON request to the userInput variable
+	if err := c.BindJSON(&userInput); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	var user models.User
+
+	cur := handler.collection.FindOne(handler.ctx, bson.M{
+		"username": userInput.Username,
+	})
+
+	err := cur.Decode(&user)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userInput.Password)); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid password"})
+		return
+	}
+
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user": user.ID.Hex(),
+		"exp":  time.Now().Add(time.Hour * 1).Unix(),
+	}).SignedString([]byte(secret))
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": token,
+		"expiry": time.Now().Add(time.Hour * 1).Unix()})
 }
