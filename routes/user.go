@@ -121,3 +121,34 @@ func (handler *UsersHandler) DeleteUserHandler(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "User has been deleted"})
 }
+
+// update user details
+func (handler *UsersHandler) UpdateUserHandler(c *gin.Context) {
+	id := c.Param("id")
+	var user models.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "username", Value: user.Username},
+			{Key: "role", Value: user.Role},
+		}},
+	}
+
+	_, err = handler.collection.UpdateOne(handler.ctx, bson.M{"id": objectID}, update)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User has been updated"})
+}
