@@ -40,5 +40,7 @@ func main() {
 	router.GET("users/:role", usersHandler.ListUsersByRoleHandler)
 	router.DELETE("user/:id", usersHandler.DeleteUserHandler)
 	router.PUT("user/:id", usersHandler.UpdateUserHandler)
+	router.PUT("/user/pwd/:id", usersHandler.UpdateUserPasswordHandler)
+
 	router.Run(":8080")
 }
