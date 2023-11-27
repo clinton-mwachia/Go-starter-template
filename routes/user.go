@@ -224,13 +224,13 @@ func (handler *UsersHandler) SignInHandler(c *gin.Context) {
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userInput.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Wrong password"})
 		return
 	}
 
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user": user.ID.Hex(),
-		"exp":  time.Now().Add(time.Hour * 1).Unix(),
+		"exp":  time.Now().Local().Add(time.Hour * 1),
 	}).SignedString([]byte(secret))
 
 	if err != nil {
@@ -239,5 +239,5 @@ func (handler *UsersHandler) SignInHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"token": token,
-		"expiry": time.Now().Add(time.Hour * 1).Unix()})
+		"expiry": time.Now().Local().Add(time.Hour * 1)})
 }
