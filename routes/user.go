@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
@@ -23,6 +24,7 @@ func NewUsersHandler(ctx context.Context, collection *mongo.Collection) *UsersHa
 	}
 }
 
+// register new user
 func (handler *UsersHandler) AddNewUser(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -47,4 +49,23 @@ func (handler *UsersHandler) AddNewUser(c *gin.Context) {
 		"message": "User Created",
 		"ID":      result.InsertedID,
 	})
+}
+
+// get all users
+func (handler *UsersHandler) ListUsersHandler(c *gin.Context) {
+	cur, err := handler.collection.Find(handler.ctx, bson.M{})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer cur.Close(handler.ctx)
+
+	users := make([]models.User, 0)
+	for cur.Next(handler.ctx) {
+		var user models.User
+		cur.Decode(&user)
+		users = append(users, user)
+	}
+
+	c.JSON(http.StatusOK, users)
 }
