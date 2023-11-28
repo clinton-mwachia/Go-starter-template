@@ -16,6 +16,7 @@ var client *mongo.Client
 var err error
 var MONGO_URI = "mongodb://127.0.0.1:27017/todo"
 var usersHandler *routes.UsersHandler
+var todosHandler *routes.TodosHandler
 
 func init() {
 	ctx = context.Background()
@@ -26,8 +27,12 @@ func init() {
 		log.Fatal(err)
 	}
 	log.Println("Connected to DB")
+
 	users_collection := client.Database("todo").Collection("users")
 	usersHandler = routes.NewUsersHandler(ctx, users_collection)
+
+	todos_collection := client.Database("todo").Collection("todos")
+	todosHandler = routes.NewTodosHandler(ctx, todos_collection)
 }
 
 func main() {
