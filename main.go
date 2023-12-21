@@ -47,6 +47,10 @@ func main() {
 	router.PUT("user/:id", usersHandler.UpdateUserHandler)
 	router.PUT("/user/pwd/:id", usersHandler.UpdateUserPasswordHandler)
 	router.POST("/user/login", usersHandler.SignInHandler)
+	/* users */
+
+	/* todos */
+	router.POST("/todo/reggister", todosHandler.AddNewUser)
 
 	router.Run(":8080")
 }
