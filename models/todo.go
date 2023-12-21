@@ -8,8 +8,13 @@ import (
 
 type Todo struct {
 	ID       primitive.ObjectID `json:"id" bson:"id" binding:"omitempty"`
-	User     primitive.ObjectID `json:"user" bson:"user"`
 	Title    string             `json:"title" bson:"title"`
 	Priority string             `json:"priority" bson:"priority"`
 	Due      time.Time          `json:"due" bson:"due"`
+	User     UserDetails
+}
+
+type UserDetails struct {
+	Username string `json:"username" bson:"username"`
+	Role     string `json:"role" bson:"role" binding:"oneof=superadmin admin user"`
 }
