@@ -54,6 +54,7 @@ func main() {
 	router.GET("/todos", todosHandler.ListTodosHandler)
 	router.GET("/todo/:id", todosHandler.GetTodoByIdHandler)
 	router.GET("/todos/:priority", todosHandler.ListTodosByRoleHandler)
+	router.DELETE("/todo/:id", todosHandler.DeleteTodoHandler)
 
 	router.Run(":8080")
 }
