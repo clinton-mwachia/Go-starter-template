@@ -71,3 +71,21 @@ func (handler *TodosHandler) ListTodosHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, todos)
 }
+
+/* a function to get todo by id*/
+func (handler *TodosHandler) GetTodoByIdHandler(c *gin.Context) {
+	id := c.Param("id")
+	objectId, _ := primitive.ObjectIDFromHex(id)
+	cur := handler.collection.FindOne(handler.ctx, bson.M{
+		"id": objectId,
+	})
+	var todo models.Todo
+	err := cur.Decode(&todo)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, todo)
+}
