@@ -89,3 +89,23 @@ func (handler *TodosHandler) GetTodoByIdHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, todo)
 }
+
+/* a function to get todo by priority */
+func (handler *TodosHandler) ListTodosByRoleHandler(c *gin.Context) {
+	priority := c.Param("priority")
+	cur, err := handler.collection.Find(handler.ctx, bson.M{"priority": priority})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer cur.Close(handler.ctx)
+
+	todos := make([]models.Todo, 0)
+	for cur.Next(handler.ctx) {
+		var todo models.Todo
+		cur.Decode(&todo)
+		todos = append(todos, todo)
+	}
+
+	c.JSON(http.StatusOK, todos)
+}
