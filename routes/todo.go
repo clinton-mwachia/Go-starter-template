@@ -109,3 +109,17 @@ func (handler *TodosHandler) ListTodosByRoleHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, todos)
 }
+
+/* a function to delete a todo */
+func (handler *TodosHandler) DeleteTodoHandler(c *gin.Context) {
+	id := c.Param("id")
+	objectId, _ := primitive.ObjectIDFromHex(id)
+	_, err := handler.collection.DeleteOne(handler.ctx, bson.M{
+		"id": objectId,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Todo has been deleted"})
+}
