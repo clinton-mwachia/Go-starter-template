@@ -170,3 +170,20 @@ func (handler *TodosHandler) CountAllTodosHandler(c *gin.Context) {
 		"TotalTodos": count,
 	})
 }
+
+/* a function to count all todos */
+func (handler *TodosHandler) CountTodosByPriorityHandler(c *gin.Context) {
+	priority := c.Param("priority")
+	count, err := handler.collection.CountDocuments(handler.ctx, bson.M{
+		"priority": priority,
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"TotalTodos": count,
+	})
+}
