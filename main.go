@@ -52,6 +52,7 @@ func main() {
 	/* todos */
 	router.POST("/todo/register", todosHandler.AddNewTodo)
 	router.GET("/todos", todosHandler.ListTodosHandler)
+	router.GET("/todo/:id", todosHandler.GetTodoByIdHandler)
 
 	router.Run(":8080")
 }
