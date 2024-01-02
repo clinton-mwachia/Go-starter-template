@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -22,6 +23,7 @@ func NewTodosHandler(ctx context.Context, collection *mongo.Collection) *TodosHa
 	}
 }
 
+/* a function to add a new todo */
 func (handler *TodosHandler) AddNewTodo(c *gin.Context) {
 	var todo models.Todo
 	if err := c.ShouldBindJSON(&todo); err != nil {
@@ -49,4 +51,23 @@ func (handler *TodosHandler) AddNewTodo(c *gin.Context) {
 		"message": "Todo Created",
 		"ID":      result.InsertedID,
 	})
+}
+
+/* a function to get all todos */
+func (handler *TodosHandler) ListTodosHandler(c *gin.Context) {
+	cur, err := handler.collection.Find(handler.ctx, bson.M{})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer cur.Close(handler.ctx)
+
+	todos := make([]models.Todo, 0)
+	for cur.Next(handler.ctx) {
+		var todo models.Todo
+		cur.Decode(&todo)
+		todos = append(todos, todo)
+	}
+
+	c.JSON(http.StatusOK, todos)
 }
