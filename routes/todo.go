@@ -123,3 +123,35 @@ func (handler *TodosHandler) DeleteTodoHandler(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Todo has been deleted"})
 }
+
+/* a function to update todo by id */
+func (handler *TodosHandler) UpdateTodoHandler(c *gin.Context) {
+	id := c.Param("id")
+	var todo models.Todo
+	if err := c.ShouldBindJSON(&todo); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// only update title and priority
+	// user role must be provided as well
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "title", Value: todo.Title},
+			{Key: "priority", Value: todo.Priority},
+		}},
+	}
+
+	_, err = handler.collection.UpdateOne(handler.ctx, bson.M{"id": objectID}, update)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Todo has been updated"})
+}
