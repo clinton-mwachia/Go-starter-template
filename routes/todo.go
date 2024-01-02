@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type TodosHandler struct {
@@ -154,4 +155,18 @@ func (handler *TodosHandler) UpdateTodoHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Todo has been updated"})
+}
+
+/* a function to count all todos */
+func (handler *TodosHandler) CountAllTodosHandler(c *gin.Context) {
+	opts := options.Count().SetHint("_id_") //optimize search
+	count, err := handler.collection.CountDocuments(handler.ctx, bson.M{}, opts)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"TotalTodos": count,
+	})
 }
