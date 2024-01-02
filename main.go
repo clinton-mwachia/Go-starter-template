@@ -50,7 +50,7 @@ func main() {
 	/* users */
 
 	/* todos */
-	router.POST("/todo/reggister", todosHandler.AddNewUser)
+	router.POST("/todo/reggister", todosHandler.AddNewTodo)
 
 	router.Run(":8080")
 }
