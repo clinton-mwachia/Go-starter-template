@@ -35,8 +35,17 @@ func init() {
 	todosHandler = routes.NewTodosHandler(ctx, todos_collection)
 }
 
+func IndeHandler(c *gin.Context) {
+	c.File("index.html")
+}
+
 func main() {
 	router := gin.Default()
+
+	/* server stativ files*/
+	router.Static("/public", "./public")
+	/* index router */
+	router.GET("/", IndeHandler)
 
 	/* users*/
 	router.POST("/user/register", usersHandler.AddNewUser)
