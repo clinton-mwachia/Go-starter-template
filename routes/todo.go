@@ -4,6 +4,7 @@ import (
 	"Go-starter-template/models"
 	"context"
 	"net/http"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -26,25 +27,49 @@ func NewTodosHandler(ctx context.Context, collection *mongo.Collection) *TodosHa
 
 /* a function to add a new todo */
 func (handler *TodosHandler) AddNewTodo(c *gin.Context) {
-	var todo models.Todo
-	if err := c.ShouldBindJSON(&todo); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// Parse MultipartForm
+	// 10 MB limit for the entire request
+	if err := c.Request.ParseMultipartForm(10 << 20); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error parsing form"})
 		return
 	}
+	username := c.PostForm("username")
+	title := c.PostForm("title")
+	priority := c.PostForm("priority")
+	role := c.PostForm("role")
 
-	var newTodo = models.Todo{
+	// Multipart form
+	form, err := c.MultipartForm()
+	if err != nil {
+		c.String(http.StatusBadRequest, "get form err: %s", err.Error())
+		return
+	}
+	files := form.File["files"]
+
+	var fileNames []string
+	for _, file := range files {
+		filename := filepath.Base(file.Filename)
+		if err := c.SaveUploadedFile(file, "./uploads/"+filename); err != nil {
+			c.String(http.StatusBadRequest, "upload file err: %s", err.Error())
+			return
+		}
+		fileNames = append(fileNames, filename)
+	}
+
+	newTodo := models.Todo{
 		ID:       primitive.NewObjectID(),
-		Title:    todo.Title,
-		Priority: todo.Priority,
+		Title:    title,
+		Priority: priority,
 		User: models.UserDetails{
-			Username: todo.User.Username,
-			Role:     todo.User.Role,
+			Username: username,
+			Role:     role,
 		},
+		Files: fileNames,
 	}
 
 	result, err := handler.collection.InsertOne(handler.ctx, newTodo)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		c.JSON(http.StatusInternalServerError, gin.H{"error-2": err})
 		return
 	}
 
