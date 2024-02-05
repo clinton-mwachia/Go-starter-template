@@ -12,6 +12,7 @@
 - Routes.
 - Authentication.
 - Easy integration and extensibility to fit your project requirements.
+- Files Upload
 
 ## 🛠️ Built with:
 
