@@ -11,6 +11,7 @@ type Todo struct {
 	Title    string             `json:"title" bson:"title"`
 	Priority string             `json:"priority" bson:"priority"`
 	Due      time.Time          `json:"due" bson:"due"`
+	Files    []string           `json:"files" bson:"files"`
 	User     UserDetails
 }
 
