@@ -12,7 +12,8 @@
 - Routes.
 - Authentication.
 - Easy integration and extensibility to fit your project requirements.
-- Files Upload
+- Files Upload.
+- Server side Pagination
 
 ## 🛠️ Built with:
 
