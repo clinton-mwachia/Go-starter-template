@@ -67,6 +67,7 @@ func main() {
 	router.PUT("/todo/:id", todosHandler.UpdateTodoHandler)
 	router.GET("/todos/count", todosHandler.CountAllTodosHandler)
 	router.GET("/todos/count/:priority", todosHandler.CountTodosByPriorityHandler)
+	router.GET("/todos/paginator", todosHandler.ListTodosWithPagHandler)
 
 	router.Run(":8080")
 }
