@@ -4,6 +4,7 @@ import (
 	"Go-starter-template/models"
 	"context"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
@@ -140,7 +141,29 @@ func (handler *TodosHandler) ListTodosByRoleHandler(c *gin.Context) {
 func (handler *TodosHandler) DeleteTodoHandler(c *gin.Context) {
 	id := c.Param("id")
 	objectId, _ := primitive.ObjectIDFromHex(id)
-	_, err := handler.collection.DeleteOne(handler.ctx, bson.M{
+
+	var todo models.Todo
+	err := handler.collection.FindOne(handler.ctx, bson.M{
+		"id": objectId,
+	}).Decode(&todo)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// If todo.Files is not null or undefined, delete associated files
+	if todo.Files != nil {
+		for _, file := range todo.Files {
+			err := os.Remove(filepath.Join("./uploads", file))
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+		}
+	}
+
+	_, err = handler.collection.DeleteOne(handler.ctx, bson.M{
 		"id": objectId,
 	})
 	if err != nil {
