@@ -3,7 +3,11 @@ package main
 import (
 	"Go-starter-template/routes"
 	"context"
+	"fmt"
+	"io"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -40,6 +44,24 @@ func IndeHandler(c *gin.Context) {
 }
 
 func main() {
+	// Set up log file
+	logFilePath := "logs/app.log"
+	err := ensureDirectory(filepath.Dir(logFilePath))
+	if err != nil {
+		fmt.Println("Error ensuring directory:", err)
+		return
+	}
+
+	f, err := os.Create(logFilePath)
+	if err != nil {
+		fmt.Println("Error creating log file:", err)
+		return
+	}
+	defer f.Close()
+
+	// Set up log to write to both console and file
+	gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
+
 	router := gin.Default()
 
 	/* server stativ files*/
@@ -70,4 +92,13 @@ func main() {
 	router.GET("/todos/paginator", todosHandler.ListTodosWithPagHandler)
 
 	router.Run(":8080")
+}
+
+// ensureDirectory creates the directory if it doesn't exist.
+func ensureDirectory(dir string) error {
+	err := os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	return nil
 }
