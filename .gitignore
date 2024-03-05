@@ -22,3 +22,6 @@ go.work
 
 # file uploads folder
 uploads/
+
+# log files
+logs/
