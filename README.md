@@ -12,7 +12,8 @@
 - Routes.
 - Authentication.
 - Easy integration and extensibility to fit your project requirements.
-- Files Upload
+- Files Upload.
+- Pagination
 
 ## 🛠️ Built with:
 
@@ -30,5 +31,5 @@ Follow these steps to get the project up and running on your local machine.
     - PORT=
     - SECRET=
 
-2. Install dependencies using `npm install`.
-3. Start the development server with `npm run dev`.
+2. Install dependencies using `go get .`.
+3. Start the development server with `go run main.go`.
