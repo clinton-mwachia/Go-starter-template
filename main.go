@@ -70,26 +70,32 @@ func main() {
 	router.GET("/", IndeHandler)
 
 	/* users*/
-	router.POST("/user/register", usersHandler.AddNewUser)
-	router.GET("/users", usersHandler.ListUsersHandler)
-	router.GET("user/:id", usersHandler.GetUserByIdHandler)
-	router.GET("users/:role", usersHandler.ListUsersByRoleHandler)
-	router.DELETE("user/:id", usersHandler.DeleteUserHandler)
-	router.PUT("user/:id", usersHandler.UpdateUserHandler)
-	router.PUT("/user/pwd/:id", usersHandler.UpdateUserPasswordHandler)
-	router.POST("/user/login", usersHandler.SignInHandler)
+	v1 := router.Group("/users")
+	{
+		v1.POST("/register", usersHandler.AddNewUser)
+		v1.GET("/", usersHandler.ListUsersHandler)
+		v1.GET("/:id", usersHandler.GetUserByIdHandler)
+		v1.GET("/role/:role", usersHandler.ListUsersByRoleHandler)
+		v1.DELETE("/:id", usersHandler.DeleteUserHandler)
+		v1.PUT("/:id", usersHandler.UpdateUserHandler)
+		v1.PUT("/pwd/:id", usersHandler.UpdateUserPasswordHandler)
+		v1.POST("/login", usersHandler.SignInHandler)
+	}
 	/* users */
 
 	/* todos */
-	router.POST("/todo/register", todosHandler.AddNewTodo)
-	router.GET("/todos", todosHandler.ListTodosHandler)
-	router.GET("/todo/:id", todosHandler.GetTodoByIdHandler)
-	router.GET("/todos/:priority", todosHandler.ListTodosByRoleHandler)
-	router.DELETE("/todo/:id", todosHandler.DeleteTodoHandler)
-	router.PUT("/todo/:id", todosHandler.UpdateTodoHandler)
-	router.GET("/todos/count", todosHandler.CountAllTodosHandler)
-	router.GET("/todos/count/:priority", todosHandler.CountTodosByPriorityHandler)
-	router.GET("/todos/paginator", todosHandler.ListTodosWithPagHandler)
+	v2 := router.Group("/todos")
+	{
+		v2.POST("/register", todosHandler.AddNewTodo)
+		v2.GET("/", todosHandler.ListTodosHandler)
+		v2.GET("/:id", todosHandler.GetTodoByIdHandler)
+		v2.GET("/priority/:priority", todosHandler.ListTodosByRoleHandler)
+		v2.DELETE("/:id", todosHandler.DeleteTodoHandler)
+		v2.PUT("/:id", todosHandler.UpdateTodoHandler)
+		v2.GET("/count", todosHandler.CountAllTodosHandler)
+		v2.GET("/count/:priority", todosHandler.CountTodosByPriorityHandler)
+		v2.GET("/paginator", todosHandler.ListTodosWithPagHandler)
+	}
 
 	router.Run(":8080")
 }
