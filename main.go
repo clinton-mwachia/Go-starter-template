@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Go-starter-template/helpers"
 	"Go-starter-template/routes"
 	"context"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -21,6 +23,7 @@ var err error
 var MONGO_URI = "mongodb://127.0.0.1:27017/todo"
 var usersHandler *routes.UsersHandler
 var todosHandler *routes.TodosHandler
+var authHandler *helpers.AuthHandler
 
 func init() {
 	ctx = context.Background()
@@ -59,6 +62,11 @@ func main() {
 	}
 	defer f.Close()
 
+	err = godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
 	// Set up log to write to both console and file
 	gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
 
@@ -84,7 +92,7 @@ func main() {
 	/* users */
 
 	/* todos */
-	v2 := router.Group("/todos")
+	v2 := router.Group("/todos", authHandler.AuthMiddleware())
 	{
 		v2.POST("/register", todosHandler.AddNewTodo)
 		v2.GET("/", todosHandler.ListTodosHandler)
