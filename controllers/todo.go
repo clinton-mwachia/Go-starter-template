@@ -51,6 +51,17 @@ func GetTodoByIDHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, todo)
 }
 
+// Get a todo by ID
+func GetTodosHandler(c *gin.Context) {
+	var todo models.Todo
+	err := config.DB.Database("go_starter_template").Collection("todos").FindOne(context.Background(), bson.M{}).Decode(&todo)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Todos not found"})
+		return
+	}
+	c.JSON(http.StatusOK, todo)
+}
+
 // Get all todos by user ID
 func GetTodosByUserIDHandler(c *gin.Context) {
 	userID := c.Param("userID")
