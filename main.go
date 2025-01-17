@@ -1,13 +1,34 @@
 package main
 
 import (
+	"go-starter-template/config"
+	"go-starter-template/routes"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
+// http://localhost:8080/api/
 func main() {
+	// Load environment variables
+	config.LoadEnv()
 
-	// Initialize Gin router
+	// Initialize Gin
 	r := gin.Default()
 
-	r.Run(":8080")
+	// Apply Middleware
+	r.Use(cors.Default())
+	//r.Use(compression.Gzip(compression.BestCompression))
+
+	// Connect to MongoDB
+	config.ConnectDB()
+
+	// Setup MongoDB Indexing
+	config.SetupIndexes()
+
+	// Setup Routes
+	routes.SetupRoutes(r)
+
+	// Run the server
+	r.Run() // Default is :8080
 }
