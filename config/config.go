@@ -33,8 +33,8 @@ func ConnectDB() {
 }
 
 func SetupIndexes() {
-	todoCollection := DB.Database("myapp").Collection("todos")
-	userCollection := DB.Database("myapp").Collection("users")
+	todoCollection := DB.Database("go_starter_template").Collection("todos")
+	userCollection := DB.Database("go_starter_template").Collection("users")
 
 	// Index for Todos
 	todoIndexes := []mongo.IndexModel{
