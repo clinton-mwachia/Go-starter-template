@@ -25,3 +25,6 @@ uploads/
 
 # log files
 logs/
+
+# test data
+testdata/
