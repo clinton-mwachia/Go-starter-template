@@ -116,3 +116,34 @@ func GetAllUsersHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, users)
 }
+
+// Delete a user
+func DeleteUserHandler(c *gin.Context) {
+	id := c.Param("id")
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	_, err = config.DB.Database("go_starter_template").Collection("users").DeleteOne(context.Background(), bson.M{"_id": objID})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+}
+
+// Count todos by user
+func CountUsersHandler(c *gin.Context) {
+	count, err := config.DB.Database("go_starter_template").Collection("users").CountDocuments(context.Background(), bson.M{})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count users"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"count": count,
+	})
+}
