@@ -19,18 +19,19 @@ func SetupRoutes(r *gin.Engine) {
 	auth.Use(middleware.AuthMiddleware())
 
 	// Todos routes
-	api.GET("/todos", controllers.GetTodosHandler)
-	api.PUT("/todo/:id", controllers.UpdateTodoHandler)
-	api.DELETE("/todo/:id", controllers.DeleteTodoHandler)
-	api.POST("/todo", controllers.CreateTodoHandler)
-	api.GET("/todos/count/:userID", controllers.CountTodosByUserHandler)
+	auth.GET("/todos", controllers.GetTodosHandler)
+	auth.PUT("/todo/:id", controllers.UpdateTodoHandler)
+	auth.DELETE("/todo/:id", controllers.DeleteTodoHandler)
+	auth.GET("/todo/:id", controllers.GetTodoByIDHandler)
+	auth.POST("/todo", controllers.CreateTodoHandler)
+	auth.GET("/todos/count/:userID", controllers.CountTodosByUserHandler)
 
 	// Users routes
-	api.GET("/users", controllers.GetAllUsersHandler)
-	api.PUT("/user/:id", controllers.UpdateUserHandler)
-	api.DELETE("/user/:id", controllers.DeleteUserHandler)
-	api.POST("/user", controllers.CreateUserHandler)
-	api.GET("/user/count", controllers.CountUsersHandler)
+	auth.PUT("/user/:id", controllers.UpdateUserHandler)
+	auth.DELETE("/user/:id", controllers.DeleteUserHandler)
+	auth.POST("/user", controllers.CreateUserHandler)
+	auth.GET("/user/count", controllers.CountUsersHandler)
+	auth.GET("/user/:id", controllers.GetUserByIDHandler)
 
 	//http://localhost:8080/api/admin/users
 	// Admin-only routes
