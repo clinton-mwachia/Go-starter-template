@@ -34,7 +34,7 @@ func CreateUserHandler(c *gin.Context) {
 
 	_, err = config.DB.Database("go_starter_template").Collection("users").InsertOne(context.Background(), user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusCreated, user)
@@ -78,7 +78,7 @@ func LoginHandler(c *gin.Context) {
 	var user models.User
 	err := config.DB.Database("go_starter_template").Collection("users").FindOne(context.Background(), bson.M{"email": credentials.Email}).Decode(&user)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 		return
 	}
 
@@ -144,6 +144,24 @@ func CountUsersHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"count": count,
+		"totalUsers": count,
 	})
+}
+
+// Get a user by ID
+func GetUserByIDHandler(c *gin.Context) {
+	id := c.Param("id")
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	var user models.User
+	err = config.DB.Database("go_starter_template").Collection("users").FindOne(context.Background(), bson.M{"_id": objID}).Decode(&user)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+	c.JSON(http.StatusOK, user)
 }
