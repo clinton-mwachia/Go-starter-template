@@ -27,7 +27,7 @@ func CreateTodoHandler(c *gin.Context) {
 
 	_, err := config.DB.Database("go_starter_template").Collection("todos").InsertOne(context.Background(), todo)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create todo"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusCreated, todo)
@@ -45,21 +45,31 @@ func GetTodoByIDHandler(c *gin.Context) {
 	var todo models.Todo
 	err = config.DB.Database("go_starter_template").Collection("todos").FindOne(context.Background(), bson.M{"_id": objID}).Decode(&todo)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Todo not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Todo not Found"})
 		return
 	}
 	c.JSON(http.StatusOK, todo)
 }
 
-// Get a todo by ID
+// Get all todos
 func GetTodosHandler(c *gin.Context) {
-	var todo models.Todo
-	err := config.DB.Database("go_starter_template").Collection("todos").FindOne(context.Background(), bson.M{}).Decode(&todo)
+	cursor, err := config.DB.Database("go_starter_template").Collection("todos").Find(context.Background(), bson.M{})
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Todos not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, todo)
+	defer cursor.Close(context.Background())
+
+	var todos []models.Todo
+	for cursor.Next(context.Background()) {
+		var todo models.Todo
+		if err := cursor.Decode(&todo); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse todos"})
+			return
+		}
+		todos = append(todos, todo)
+	}
+	c.JSON(http.StatusOK, todos)
 }
 
 // Get all todos by user ID
@@ -73,7 +83,7 @@ func GetTodosByUserIDHandler(c *gin.Context) {
 
 	cursor, err := config.DB.Database("go_starter_template").Collection("todos").Find(context.Background(), bson.M{"userID": objID})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch todos"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	defer cursor.Close(context.Background())
@@ -134,13 +144,13 @@ func CountTodosByUserHandler(c *gin.Context) {
 
 	count, err := config.DB.Database("go_starter_template").Collection("todos").CountDocuments(context.Background(), bson.M{"userID": objID})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count todos"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"userID": userID,
-		"count":  count,
+		"userID":     userID,
+		"totalTodos": count,
 	})
 }
 
@@ -163,7 +173,7 @@ func UpdateTodoHandler(c *gin.Context) {
 
 	_, err = config.DB.Database("go_starter_template").Collection("todos").UpdateOne(context.Background(), bson.M{"_id": objID}, bson.M{"$set": updates})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update todo"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -181,7 +191,7 @@ func DeleteTodoHandler(c *gin.Context) {
 
 	_, err = config.DB.Database("go_starter_template").Collection("todos").DeleteOne(context.Background(), bson.M{"_id": objID})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete todo"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
