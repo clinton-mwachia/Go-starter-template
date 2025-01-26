@@ -20,6 +20,8 @@ func SetupRoutes(r *gin.Engine) {
 
 	// Todos routes
 	auth.GET("/todos", controllers.GetTodosHandler)
+	auth.GET("/todos/:userID", controllers.GetTodosByUserIDHandler)
+	auth.GET("/todos/user/:userID", controllers.GetTodosPaginatedHandler) // http://localhost:8080/api/todos/user/12343?page=1&limit=10
 	auth.PUT("/todo/:id", controllers.UpdateTodoHandler)
 	auth.DELETE("/todo/:id", controllers.DeleteTodoHandler)
 	auth.GET("/todo/:id", controllers.GetTodoByIDHandler)

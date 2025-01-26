@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"go-starter-template/config"
@@ -11,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Create a new todo
@@ -100,25 +102,37 @@ func GetTodosByUserIDHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, todos)
 }
 
-/* Get paginated todos
+// Get paginated todos
 func GetTodosPaginatedHandler(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
-	offset := (page - 1) * limit
 
-	cursor, err := config.DB.Database("go_starter_template").Collection("todos").Find(context.Background(), bson.M{}, nil)
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 10
+	}
+
+	skip := int64((page - 1) * limit)
+	findOptions := options.Find().SetSkip(skip).SetLimit(int64(limit))
+
+	userID := c.Param("userID")
+	objID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch todos"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid User ID"})
+		return
+	}
+
+	cursor, err := config.DB.Database("go_starter_template").Collection("todos").Find(context.Background(), bson.M{"userID": objID}, findOptions)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	defer cursor.Close(context.Background())
 
 	var todos []models.Todo
 	for cursor.Next(context.Background()) {
-		if int64(len(todos)) >= int64(limit) {
-			break
-		}
-
 		var todo models.Todo
 		if err := cursor.Decode(&todo); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse todos"})
@@ -126,13 +140,24 @@ func GetTodosPaginatedHandler(c *gin.Context) {
 		}
 		todos = append(todos, todo)
 	}
+
+	// Count the total todos for the user
+	count, err := config.DB.Database("go_starter_template").Collection("todos").CountDocuments(context.Background(), bson.M{"userID": objID})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count todos"})
+		return
+	}
+
+	// Respond with paginated todos and metadata
 	c.JSON(http.StatusOK, gin.H{
-		"page":  page,
-		"limit": limit,
-		"todos": todos,
+		"todos":      todos,
+		"page":       page,
+		"limit":      limit,
+		"total":      count,
+		"totalPages": (count + int64(limit) - 1) / int64(limit), // Calculate total pages
 	})
 }
-*/
+
 // Count todos by user
 func CountTodosByUserHandler(c *gin.Context) {
 	userID := c.Param("userID")
