@@ -28,3 +28,6 @@ logs/
 
 # test data
 testdata/
+
+# adjustments
+Adjustments.txt
