@@ -146,6 +146,12 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ---
 
+## Update all packages to latest
+
+```go
+go get -u
+```
+
 ## Contributing
 
 Contributions are welcome! Please follow these steps:
